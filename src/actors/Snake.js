@@ -11,14 +11,12 @@ export default class Snake {
         this.yspeed = 0;
         this.total = 0;
         this.tail = [];
-        this.gulpSound = new Audio("src/audios/gulp.mp3");
     }
 
 
     verifyEat(pos) {
         var d = this._getDistance(this.x, this.y, pos.x, pos.y);
         if (d < 1) {
-            this.gulpSound.play()
             this.total++;
             return true;
         } else {
@@ -110,6 +108,28 @@ export default class Snake {
             graphicServices.pixel(this.tail[i].x, this.tail[i].y, 'yellow');
         }
         this._score()
+    }
+
+    keyPressed(keyCode) {
+        switch (keyCode.key) {
+            case "ArrowUp":
+                snake.setDirection("up");
+                break;
+    
+            case "ArrowDown":
+                snake.setDirection("down");
+                break;
+    
+            case "ArrowLeft":
+                snake.setDirection("left");
+                break;
+    
+            case "ArrowRight":
+                snake.setDirection("right");
+                break;
+            default:
+                break;
+        }
     }
 }
 

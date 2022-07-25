@@ -4,11 +4,11 @@ import Food from './actors/Food.js'
 
 //----------INIT PROPPS ----
 var speed = 7
-var speedIncrease = 1
+var speedIncrease = 0.1
+var velocity = 0
 
 
 //------------Create elements-----
-const gameover = new Audio("src/audios/gameover.wav");
 const snake = new Snake();
 const food = new Food();
 
@@ -19,51 +19,39 @@ function draw() {
     if (snake.verifyEat(foodLocation)) {
         food.replace()
         speed += speedIncrease
+        console.log(`velocity: ${velocity}`)
     }
 
     if (snake.verifyDeath()) {
         speed = 7
-        gameover.play()
     }
     food.draw()
     snake.update();
-    setTimeout(draw, 1000 / speed);
+    velocity = Math.round(1000 / speed)
+    setTimeout(draw, velocity);
 
 }
 draw()
 
 //-----------Keyboard Input-------------
-document.onkeydown = (event) => {
-    var keyCode;
-    if (event == null) {
-        keyCode = window.event.keyCode;
-    }
-    else {
-        keyCode = event.keyCode;
-    }
-
-    switch (keyCode) {
-        // left
-        case 37:
-            snake.setDirection("left");
-            break;
-
-        // up
-        case 38:
+window.addEventListener("keydown", (keyCode) => {
+    switch (keyCode.key) {
+        case "ArrowUp":
             snake.setDirection("up");
             break;
 
-        // right
-        case 39:
-            snake.setDirection("right");
-            break;
-
-        // down
-        case 40:
+        case "ArrowDown":
             snake.setDirection("down");
             break;
 
+        case "ArrowLeft":
+            snake.setDirection("left");
+            break;
+
+        case "ArrowRight":
+            snake.setDirection("right");
+            break;
         default:
             break;
     }
-}
+});

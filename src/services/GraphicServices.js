@@ -7,7 +7,7 @@ class GraphicServices {
         this.context = this.c.getContext("2d");
         this.width = this.context.canvas.clientWidth
         this.height = this.context.canvas.clientHeight
-        this.scale = 60
+        this.scale = 40
     }
 
     background(color) {
