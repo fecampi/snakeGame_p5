@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="1920" height="1080">
+        Your browser does not support the HTML5 canvas tag.</canvas>
+    <script>
+        //------GRAPHICS ELEMENTS-------------
+        class GraphicServices {
+            constructor() {
+                this.c = document.getElementById("myCanvas");
+                this.context = this.c.getContext("2d");
+                this.width = this.context.canvas.clientWidth
+                this.height = this.context.canvas.clientHeight
+                this.scale = 60
+            }
+
+            background(color) {
+                this.context.clearRect(0, 0, this.width, this.height);
+                this.context.fillStyle = color;
+                this.context.beginPath();
+                this.context.rect(0, 0, this.width, this.height);
+                this.context.fill();
+            }
+            pixel(x, y, color) {
+                //rectangle
+                this.context.fillStyle = color;
+                this.context.beginPath();
+                this.context.rect(x, y, this.scale, this.scale);
+                this.context.fill();
+                // board
+                this.context.beginPath();
+                this.context.lineWidth = "4";
+                this.context.strokeStyle = "black";
+                this.context.rect(x, y, this.scale, this.scale);
+                this.context.stroke();
+            }
+            text(text, x, y, color) {
+                this.context.fillStyle = color;
+                this.context.font = `${this.scale}px Georgia`;
+                this.context.fillText(text, x, y);
+            }
+        }
+
+        const graphicServices = new GraphicServices();
+        Object.freeze(graphicServices);
+        const { scale, width, height } = graphicServices
+
+        //---------------actors-------------
+        //Snake
+        class Snake {
+            constructor() {
+                this.x = 0;
+                this.y = 0;
+                this.xspeed = 1;
+                this.yspeed = 0;
+                this.total = 0;
+                this.tail = [];
+                this.gulpSound = new Audio("src/audios/gulp.mp3");
+            }
+
+
+            verifyEat(pos) {
+                var d = this._getDistance(this.x, this.y, pos.x, pos.y);
+                if (d < 1) {
+                    this.gulpSound.play()
+                    this.total++;
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            _getDistance(x1, y1, x2, y2) {
+                return Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+            }
+
+            setDirection(direction) {
+                switch (direction) {
+                    // left
+                    case "left":
+                        this.xspeed = -1;
+                        this.yspeed = 0;
+                        break;
+
+                    // up
+                    case "up":
+                        this.xspeed = 0;
+                        this.yspeed = -1;
+                        break;
+
+                    // right
+                    case "right":
+                        this.xspeed = 1;
+                        this.yspeed = 0;
+                        break;
+
+                    // down
+                    case "down":
+                        this.xspeed = 0;
+                        this.yspeed = 1;
+                        break;
+
+                    default:
+                        break;
+                }
+                return
+            }
+
+            verifyDeath() {
+                for (var i = 0; i < this.tail.length; i++) {
+                    var pos = this.tail[i];
+                    var d = this._getDistance(this.x, this.y, pos.x, pos.y);
+                    if (d < 1) {
+                        this.total = 0;
+                        this.tail = [];
+                        return true
+                    }
+                }
+                return false
+            }
+
+            _limit(value, limit) {
+                if (value >= limit) {
+                    return limit
+                }
+                if (value <= 0) {
+                    return 0
+                }
+                return value
+            }
+
+            update() {
+                for (var i = 0; i < this.tail.length - 1; i++) {
+                    this.tail[i] = this.tail[i + 1];
+                }
+                if (this.total >= 1) {
+                    this.tail[this.total - 1] = { x: this.x, y: this.y };
+                }
+
+                this.x = this.x + this.xspeed * scale;
+                this.y = this.y + this.yspeed * scale;
+
+                this.x = this._limit(this.x, width - scale);
+                this.y = this._limit(this.y, height - scale);
+                this._draw()
+            }
+
+            _score() {
+                graphicServices.text(`SCORE: ${this.total}`, scale, scale, "yellow")
+            }
+
+            _draw() {
+                graphicServices.pixel(this.x, this.y, 'yellow');
+                for (var i = 0; i < this.tail.length; i++) {
+                    graphicServices.pixel(this.tail[i].x, this.tail[i].y, 'yellow');
+                }
+                this._score()
+            }
+        }
+
+        //-------------------Food-----------------
+        class Food {
+            constructor() {
+                this.replace()
+            }
+            draw() {
+                graphicServices.pixel(this.x, this.y, 'red');
+            }
+
+            _getRandomArbitrary(max) {
+                return Math.random() * max;
+            }
+
+            replace() {
+                this.x = Math.floor(this._getRandomArbitrary(Math.floor(width / scale))) * scale
+                this.y = Math.floor(this._getRandomArbitrary(Math.floor(height / scale))) * scale
+            }
+
+            getLocation() {
+                return { x: this.x, y: this.y }
+            }
+        }
+
+        //----------INIT PROPPS ----
+        var speed = 7
+        var speedIncrease = 1
+
+
+        //------------Create elements-----
+        const gameover = new Audio("src/audios/gameover.wav");
+        const snake = new Snake();
+        const food = new Food();
+
+        // ---------GAME ENGINE---------
+        function draw() {
+            graphicServices.background("black");
+            const foodLocation = food.getLocation()
+            if (snake.verifyEat(foodLocation)) {
+                food.replace()
+                speed += speedIncrease
+            }
+
+            if (snake.verifyDeath()) {
+                speed = 7
+                gameover.play()
+            }
+            food.draw()
+            snake.update();
+            setTimeout(draw, 1000 / speed);
+
+        }
+        draw()
+
+        //-----------Keyboard Input-------------
+        document.onkeydown = (event) => {
+            var keyCode;
+            if (event == null) {
+                keyCode = window.event.keyCode;
+            }
+            else {
+                keyCode = event.keyCode;
+            }
+
+            switch (keyCode) {
+                // left
+                case 37:
+                    snake.setDirection("left");
+                    break;
+
+                // up
+                case 38:
+                    snake.setDirection("up");
+                    break;
+
+                // right
+                case 39:
+                    snake.setDirection("right");
+                    break;
+
+                // down
+                case 40:
+                    snake.setDirection("down");
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
