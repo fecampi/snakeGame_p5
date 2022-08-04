@@ -18,7 +18,7 @@ export default class Snake {
         var d = this._getDistance(this.x, this.y, pos.x, pos.y);
         if (d < 1) {
             this.total++;
-            return true;
+            return {x:this.x, y:this.y}
         } else {
             return false;
         }

@@ -4,18 +4,21 @@ const { scale, width, height } = graphicServices
 export default class Food {
     constructor() {
         this.replace()
+        this.x
+        this.y
     }
     draw() {
         graphicServices.pixel(this.x, this.y, 'red');
     }
 
-    _getRandomArbitrary(max) {
-        return Math.random() * max;
+    _getRandomArbitrary(min, max) {
+        return Math.floor(Math.floor(Math.random() * (Math.floor((max - scale) / scale - min + 1) + min)))* scale
     }
 
     replace() {
-        this.x = Math.floor(this._getRandomArbitrary(Math.floor(width / scale))) * scale
-        this.y = Math.floor(this._getRandomArbitrary(Math.floor(height / scale))) * scale
+        const min = 0
+        this.x = this._getRandomArbitrary(min, width) 
+        this.y = this._getRandomArbitrary(min, height)
     }
 
     getLocation() {

@@ -13,7 +13,7 @@ const snake = new Snake();
 const food = new Food();
 
 // ---------GAME ENGINE---------
-function draw() {
+function animate() {
     graphicServices.background("black");
     const foodLocation = food.getLocation()
     if (snake.verifyEat(foodLocation)) {
@@ -28,30 +28,37 @@ function draw() {
     food.draw()
     snake.update();
     velocity = Math.round(1000 / speed)
-    setTimeout(draw, velocity);
+    setTimeout(animate, velocity);
 
 }
-draw()
+animate()
 
-//-----------Keyboard Input-------------
-window.addEventListener("keydown", (keyCode) => {
-    switch (keyCode.key) {
-        case "ArrowUp":
-            snake.setDirection("up");
-            break;
 
-        case "ArrowDown":
-            snake.setDirection("down");
-            break;
 
-        case "ArrowLeft":
-            snake.setDirection("left");
-            break;
 
-        case "ArrowRight":
-            snake.setDirection("right");
-            break;
-        default:
-            break;
+function exit() {
+    console.log("EXIT")
+    if (window.history.length > 1) {
+        window.history.back();
     }
+    return
+}
+
+
+
+window.addEventListener('keydown', (evento) => {
+    function keyPress(type) {
+        const keys = {
+            "ArrowUp": () => snake.setDirection("up"),
+            "ArrowDown": () => snake.setDirection("down"),
+            "ArrowLeft": () => snake.setDirection("left"),
+            "ArrowRight": () => snake.setDirection("right"),
+            "BrowserBack": () => exit(),
+            "Exit": () => exit(),
+            "default": () => { return },
+        };
+        (keys[type] || keys['default'])();
+    }
+    keyPress(evento.key)
 });
+
