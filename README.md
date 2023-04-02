@@ -1,5 +1,7 @@
 # **Jogo Snake em JavaScript com Canvas**
 
+![Imagem do Jogo Snake](./image.png)
+
 Este jogo de Snake foi criado utilizando JavaScript e Canvas. O objetivo do jogo é controlar a cobra e comer a maior quantidade possível de comida sem colidir com as paredes ou com o próprio corpo da cobra.
 
 ## **Classes**
